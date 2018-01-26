@@ -62,7 +62,7 @@ func fixSegment(segment []byte) int {
 	segLen = (int(segment[2]) | (int(segment[3]) << 8))
 	segEnd = segLen + (int(segment[0]) | (int(segment[1]) << 8)) - 1
 	fmt.Printf("Segment end: 0x%04X\n", segEnd)
-	fmt.Printf("Segment lenght: 0x%04X\n", segLen)
+	fmt.Printf("Segment length: 0x%04X\n", segLen)
 
 	segment[2] = byte(segEnd & 0xff)
 	segment[3] = byte(segEnd >> 8)
