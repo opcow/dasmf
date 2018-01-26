@@ -44,7 +44,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		if fSize < 5 || fSize > 0xffc {
+		if fSize < 5 || fSize > 0xffc || (data[0] == 0xff && data[1] == 0xff) {
 			fmt.Println("dasmf: input file is the wrong format")
 			os.Exit(1)
 		}
