@@ -9,44 +9,54 @@ import (
 
 func main() {
 
-	var nextSeg = 0
-	var segLen = 0
+	var nextSeg, segLen int
+	var ifName, ofName string
 
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: dasmf infile outfile")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: dasmf infile [outfile]")
 		os.Exit(1)
 	}
-	ifname := os.Args[1]
-	ofname := os.Args[2]
+	ifName = os.Args[1]
+	if len(os.Args) > 2 {
+		ofName = os.Args[2]
+	} else {
+		ofName = os.Args[1]
+	}
 
-	if _, err := os.Stat(ifname); os.IsNotExist(err) {
-		fmt.Println("dasmf: input file not found")
+	finfo, err := os.Stat(ifName)
+	if err != nil {
+		fmt.Println("dasmf: couldn't stat input file")
 		os.Exit(1)
 	}
-	f, err := os.Open(ifname)
+	fSize := finfo.Size()
+	f, err := os.Open(ifName)
 	if err != nil {
 		panic(err)
 	}
-	defer f.Close()
-
-	data := make([]byte, 8192)
-
-	bufr := bufio.NewReader(f)
-	br, err := bufr.Read(data)
-	if br < 5 || br > 0xffc {
-		fmt.Println("dasmf: input file is the wrong format")
-		os.Exit(1)
+	if fSize > 16384 {
+		fmt.Println("dasmf: file too large.")
 	}
-
-	of, err := os.Create(ofname)
+	data := make([]byte, fSize)
+	{
+		defer f.Close()
+		bufr := bufio.NewReader(f)
+		_, err := bufr.Read(data)
+		if err != nil {
+			panic(err)
+		}
+		if fSize < 5 || fSize > 0xffc {
+			fmt.Println("dasmf: input file is the wrong format")
+			os.Exit(1)
+		}
+	}
+	of, err := os.Create(ofName)
 	if err != nil {
 		panic(err)
 	}
 	defer of.Close()
 	header := [2]byte{0xff, 0xff}
 	of.Write(header[:])
-	//	of.Write(data[:br])
-	for i := 1; nextSeg <= br-2; i++ {
+	for i := 1; nextSeg <= int(fSize-2); i++ {
 		fmt.Printf("\nProcessing segment %d\n", i)
 		segLen = fixSegment(data[nextSeg:])
 		of.Write(data[nextSeg : nextSeg+segLen+4])
