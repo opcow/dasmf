@@ -1,3 +1,4 @@
+// Fixes segment headers for Atari 8-bit in dasm created binaries
 package main
 
 import (
@@ -33,7 +34,7 @@ func main() {
 	bufr := bufio.NewReader(f)
 	br, err := bufr.Read(data)
 	if br < 5 || br > 0xffc {
-		fmt.Println("dasm: input file is the wrong format")
+		fmt.Println("dasmf: input file is the wrong format")
 		os.Exit(1)
 	}
 
